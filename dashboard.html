@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Nge-Gram – Feed</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Pacifico&family=Nunito:wght@400;600;700;800&display=swap');
+
+    :root {
+      --pink:    #ff2d78;
+      --orange:  #ff7200;
+      --purple:  #7b00ff;
+      --yellow:  #ffd000;
+      --bg:      #fafafa;
+      --card:    #ffffff;
+      --border:  #dbdbdb;
+      --dark:    #262626;
+      --mid:     #555555;
+      --light:   #8e8e8e;
+      --grad: linear-gradient(45deg, var(--pink), var(--orange), var(--purple));
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Nunito', Comic Sans MS, cursive;
+      background: var(--bg);
+      color: var(--dark);
+      min-height: 100vh;
+    }
+
+    /* ===================== NAVBAR ===================== */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: white;
+      border-bottom: 1.5px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 20px;
+      box-shadow: 0 2px 8px rgba(255,45,120,0.08);
+    }
+
+    .nav-logo {
+      font-family: 'Pacifico', cursive;
+      font-size: 1.7rem;
+      background: var(--grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.5px;
+    }
+
+    .nav-logo span {
+      font-size: 0.5rem;
+      background: var(--pink);
+      -webkit-text-fill-color: white;
+      color: white;
+      padding: 2px 5px;
+      border-radius: 3px;
+      vertical-align: super;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .nav-icons {
+      display: flex;
+      gap: 18px;
+      align-items: center;
+    }
+
+    .nav-icon {
+      font-size: 1.4rem;
+      cursor: pointer;
+      transition: transform 0.15s;
+      position: relative;
+    }
+    .nav-icon:hover { transform: scale(1.2); }
+
+    .notif-badge {
+      position: absolute;
+      top: -4px; right: -6px;
+      background: var(--pink);
+      color: white;
+      font-size: 0.55rem;
+      font-weight: 800;
+      width: 15px; height: 15px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .nav-search {
+      background: #efefef;
+      border: none;
+      border-radius: 8px;
+      padding: 7px 14px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.82rem;
+      color: var(--dark);
+      width: 200px;
+      outline: none;
+    }
+
+    /* ===================== LAYOUT ===================== */
+    .page-wrap {
+      display: flex;
+      justify-content: center;
+      gap: 28px;
+      padding: 24px 16px;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    /* ===================== STORIES ===================== */
+    .stories-bar {
+      background: white;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      display: flex;
+      gap: 16px;
+      overflow-x: auto;
+      margin-bottom: 18px;
+      scrollbar-width: none;
+    }
+    .stories-bar::-webkit-scrollbar { display: none; }
+
+    .story {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .story-ring {
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      background: var(--grad);
+      padding: 2.5px;
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.2s;
+    }
+    .story-ring:hover { transform: scale(1.08); }
+
+    .story-ring.seen {
+      background: #c7c7c7;
+    }
+
+    .story-inner {
+      width: 100%; height: 100%;
+      border-radius: 50%;
+      background: #efefef;
+      border: 2.5px solid white;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem;
+      overflow: hidden;
+    }
+
+    .story-name {
+      font-size: 0.62rem;
+      color: var(--dark);
+      max-width: 60px;
+      text-align: center;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* ===================== FEED ===================== */
+    .feed { flex: 1; max-width: 470px; }
+
+    /* ===================== POST CARD ===================== */
+    .post {
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 22px;
+      overflow: hidden;
+      animation: fadeUp 0.5s ease both;
+    }
+    .post:nth-child(2) { animation-delay: 0.1s; }
+    .post:nth-child(3) { animation-delay: 0.2s; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .post-header {
+      display: flex;
+      align-items: center;
+      padding: 10px 14px;
+      gap: 10px;
+    }
+
+    .avatar-ring {
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      background: var(--grad);
+      padding: 2px;
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .avatar-inner {
+      width: 100%; height: 100%;
+      border-radius: 50%;
+      background: #efefef;
+      border: 2px solid white;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+    }
+
+    .post-meta { flex: 1; }
+    .post-username {
+      font-weight: 800;
+      font-size: 0.88rem;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .verified {
+      font-size: 0.7rem;
+      background: var(--grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .post-location {
+      font-size: 0.7rem;
+      color: var(--light);
+    }
+
+    .post-more {
+      font-size: 1.3rem;
+      cursor: pointer;
+      color: var(--mid);
+      padding: 0 4px;
+    }
+
+    /* ---- IMAGE AREA ---- */
+    .post-image {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      background: #f0f0f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* Stick figure */
+    .stick-figure {
+      position: relative;
+      width: 120px;
+      height: 160px;
+    }
+    .stick-figure svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Error image */
+    .img-error {
+      text-align: center;
+      padding: 20px;
+    }
+    .img-error .error-icon { font-size: 3.5rem; margin-bottom: 8px; }
+    .img-error .error-text {
+      font-size: 0.78rem;
+      color: var(--light);
+      font-weight: 600;
+      line-height: 1.6;
+    }
+    .img-error .error-code {
+      margin-top: 8px;
+      font-size: 0.65rem;
+      color: #ccc;
+      font-family: monospace;
+    }
+
+    /* CSS "photo" post */
+    .css-photo {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .sun {
+      width: 60px; height: 60px;
+      background: var(--yellow);
+      border-radius: 50%;
+      box-shadow: 0 0 0 8px rgba(255,208,0,0.25),
+                  0 0 0 16px rgba(255,208,0,0.1);
+      animation: pulse 2s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+    @keyframes pulse {
+      0%,100% { transform: scale(1); }
+      50%      { transform: scale(1.08); }
+    }
+    .mountains {
+      display: flex;
+      align-items: flex-end;
+      gap: 0;
+      margin-top: 10px;
+    }
+    .mountain {
+      width: 0; height: 0;
+      border-left: solid transparent;
+      border-right: solid transparent;
+      border-bottom: solid;
+    }
+
+    /* "Selfie" post */
+    .selfie-area {
+      width: 100%; height: 100%;
+      background: linear-gradient(135deg, #e8d5f5, #ffd6e0, #ffe5b4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 10px;
+      position: relative;
+    }
+    .selfie-face { font-size: 6rem; }
+    .selfie-caption-overlay {
+      position: absolute;
+      bottom: 14px;
+      left: 14px;
+      background: rgba(0,0,0,0.35);
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+      backdrop-filter: blur(4px);
+    }
+
+    /* ---- POST ACTIONS ---- */
+    .post-actions {
+      display: flex;
+      align-items: center;
+      padding: 10px 14px 6px;
+      gap: 14px;
+    }
+    .action-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1.35rem;
+      transition: transform 0.15s;
+      line-height: 1;
+    }
+    .action-btn:hover { transform: scale(1.25); }
+    .action-btn.liked { animation: heartPop 0.3s ease; }
+    @keyframes heartPop {
+      0%,100% { transform: scale(1); }
+      50%      { transform: scale(1.5); }
+    }
+    .spacer { flex: 1; }
+
+    .post-likes {
+      padding: 0 14px 4px;
+      font-size: 0.85rem;
+      font-weight: 800;
+    }
+
+    .post-caption {
+      padding: 2px 14px 10px;
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+    .post-caption .uname {
+      font-weight: 800;
+      margin-right: 4px;
+    }
+
+    .post-tags {
+      color: #385185;
+      font-size: 0.82rem;
+      padding: 0 14px 6px;
+    }
+
+    .post-comments-link {
+      padding: 0 14px 4px;
+      font-size: 0.8rem;
+      color: var(--light);
+      cursor: pointer;
+    }
+
+    .post-time {
+      padding: 0 14px 12px;
+      font-size: 0.68rem;
+      color: var(--light);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .comment-box {
+      display: flex;
+      align-items: center;
+      padding: 8px 14px 10px;
+      border-top: 1px solid var(--border);
+      gap: 10px;
+    }
+    .comment-avatar { font-size: 1.2rem; }
+    .comment-input {
+      flex: 1;
+      border: none;
+      background: none;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.82rem;
+      color: var(--dark);
+      outline: none;
+    }
+    .comment-input::placeholder { color: var(--light); }
+    .post-btn {
+      background: none;
+      border: none;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      font-size: 0.82rem;
+      color: var(--pink);
+      cursor: pointer;
+    }
+
+    /* ===================== SIDEBAR ===================== */
+    .sidebar {
+      width: 300px;
+      flex-shrink: 0;
+      position: sticky;
+      top: 80px;
+      align-self: flex-start;
+    }
+
+    .sidebar-user {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .sidebar-avatar {
+      width: 54px; height: 54px;
+      border-radius: 50%;
+      background: var(--grad);
+      padding: 2.5px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .sidebar-avatar-inner {
+      width: 100%; height: 100%;
+      border-radius: 50%;
+      background: #efefef;
+      border: 2.5px solid white;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem;
+    }
+    .sidebar-uname { font-weight: 800; font-size: 0.9rem; }
+    .sidebar-name  { font-size: 0.78rem; color: var(--light); }
+    .sidebar-switch {
+      margin-left: auto;
+      background: none; border: none;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      font-size: 0.78rem;
+      color: #385185;
+      cursor: pointer;
+    }
+
+    .sidebar-section-title {
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: var(--light);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+
+    .suggestion {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .sug-avatar {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      background: #efefef;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+      border: 1.5px solid var(--border);
+      flex-shrink: 0;
+    }
+    .sug-info { flex: 1; }
+    .sug-uname { font-weight: 800; font-size: 0.82rem; }
+    .sug-sub   { font-size: 0.72rem; color: var(--light); }
+    .sug-follow {
+      background: none; border: none;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      font-size: 0.78rem;
+      color: #385185;
+      cursor: pointer;
+      transition: color 0.15s;
+    }
+    .sug-follow:hover { color: var(--pink); }
+
+    .sidebar-footer {
+      margin-top: 20px;
+      font-size: 0.65rem;
+      color: #c0c0c0;
+      line-height: 1.9;
+    }
+    .sidebar-footer a { color: #c0c0c0; text-decoration: none; }
+    .sidebar-footer a:hover { text-decoration: underline; }
+
+    /* ===================== RESPONSIVE ===================== */
+    @media (max-width: 700px) {
+      .sidebar { display: none; }
+      .feed { max-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ============ NAVBAR ============ -->
+<nav>
+  <div class="nav-logo">Nge-Gram<span>Beta™</span></div>
+
+  <input class="nav-search" type="text" placeholder="🔍  Search (doesn't work)" />
+
+  <div class="nav-icons">
+    <div class="nav-icon" title="Home">🏠</div>
+    <div class="nav-icon" title="Explore">🧭</div>
+    <div class="nav-icon" title="Reels">🎬</div>
+    <div class="nav-icon" title="Upload">➕</div>
+    <div class="nav-icon" title="Notifications" style="position:relative">
+      ❤️
+      <div class="notif-badge">99</div>
+    </div>
+    <div class="nav-icon" title="Profile">👤</div>
+  </div>
+</nav>
+
+<!-- ============ PAGE ============ -->
+<div class="page-wrap">
+
+  <!-- ========= FEED ========= -->
+  <div class="feed">
+
+    <!-- STORIES -->
+    <div class="stories-bar">
+      <!-- Add story -->
+      <div class="story">
+        <div class="story-ring" style="background: #efefef; padding: 0;">
+          <div class="story-inner" style="font-size:1.6rem; color: var(--pink);">➕</div>
+        </div>
+        <div class="story-name">Your Story</div>
+      </div>
+      <div class="story">
+        <div class="story-ring"><div class="story-inner">🥷</div></div>
+        <div class="story-name">HackerPro99</div>
+      </div>
+      <div class="story">
+        <div class="story-ring"><div class="story-inner">🍜</div></div>
+        <div class="story-name">KangBakso</div>
+      </div>
+      <div class="story">
+        <div class="story-ring"><div class="story-inner">🐱</div></div>
+        <div class="story-name">CatLover404</div>
+      </div>
+      <div class="story">
+        <div class="story-ring seen"><div class="story-inner">🤠</div></div>
+        <div class="story-name">CowboyDev</div>
+      </div>
+      <div class="story">
+        <div class="story-ring seen"><div class="story-inner">🍌</div></div>
+        <div class="story-name">BananaKing</div>
+      </div>
+      <div class="story">
+        <div class="story-ring seen"><div class="story-inner">🤖</div></div>
+        <div class="story-name">TotallyHuman</div>
+      </div>
+    </div>
+
+    <!-- ===================== POST 1 ===================== -->
+    <div class="post">
+      <div class="post-header">
+        <div class="avatar-ring">
+          <div class="avatar-inner">🥷</div>
+        </div>
+        <div class="post-meta">
+          <div class="post-username">hackerpro99 <span class="verified">✦ verified?</span></div>
+          <div class="post-location">📍 The Dark Web, Internet</div>
+        </div>
+        <div class="post-more">···</div>
+      </div>
+
+      <!-- Image: Glorious stick figure masterpiece -->
+      <div class="post-image" style="background: linear-gradient(160deg, #1a1a2e, #16213e, #0f3460);">
+        <div style="text-align:center;">
+          <!-- CSS Stick Figure -->
+          <svg width="130" height="180" viewBox="0 0 130 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Head -->
+            <circle cx="65" cy="35" r="22" stroke="#00ff88" stroke-width="3" fill="none"/>
+            <!-- Eyes -->
+            <circle cx="57" cy="31" r="3" fill="#00ff88"/>
+            <circle cx="73" cy="31" r="3" fill="#00ff88"/>
+            <!-- Smile -->
+            <path d="M55 42 Q65 52 75 42" stroke="#00ff88" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+            <!-- Body -->
+            <line x1="65" y1="57" x2="65" y2="115" stroke="#00ff88" stroke-width="3" stroke-linecap="round"/>
+            <!-- Arms -->
+            <line x1="65" y1="75" x2="30" y2="95" stroke="#00ff88" stroke-width="3" stroke-linecap="round"/>
+            <line x1="65" y1="75" x2="100" y2="65" stroke="#00ff88" stroke-width="3" stroke-linecap="round"/>
+            <!-- Hand with phone -->
+            <rect x="97" y="56" width="14" height="20" rx="2" stroke="#00ff88" stroke-width="2" fill="none"/>
+            <line x1="104" y1="59" x2="104" y2="59" stroke="#00ff88" stroke-width="1.5"/>
+            <!-- Legs -->
+            <line x1="65" y1="115" x2="40" y2="155" stroke="#00ff88" stroke-width="3" stroke-linecap="round"/>
+            <line x1="65" y1="115" x2="90" y2="155" stroke="#00ff88" stroke-width="3" stroke-linecap="round"/>
+            <!-- Shoes -->
+            <ellipse cx="37" cy="158" rx="10" ry="5" fill="#00ff88"/>
+            <ellipse cx="93" cy="158" rx="10" ry="5" fill="#00ff88"/>
+          </svg>
+          <div style="color:#00ff88; font-size:0.65rem; margin-top:6px; font-family:monospace; opacity:0.7;">
+            &lt;!-- me doing cybersecurity --&gt;
+          </div>
+        </div>
+      </div>
+
+      <div class="post-actions">
+        <button class="action-btn" onclick="this.textContent='❤️'; this.classList.add('liked')">🤍</button>
+        <button class="action-btn">💬</button>
+        <button class="action-btn">📤</button>
+        <div class="spacer"></div>
+        <button class="action-btn">🔖</button>
+      </div>
+
+      <div class="post-likes">1,337 likes</div>
+      <div class="post-caption">
+        <span class="uname">hackerpro99</span>
+        just hacked into NASA. ngl the wifi password was "nasa1234". anyway here's my selfie
+        <span style="font-size:0.85rem;">😎🔥💻</span>
+      </div>
+      <div class="post-tags">#hacking #notACrime #ethicalMaybe #nasa #hi_nasa</div>
+      <div class="post-comments-link">View all 842 comments</div>
+      <div class="post-time">3 minutes ago · probably</div>
+      <div class="comment-box">
+        <div class="comment-avatar">👤</div>
+        <input class="comment-input" type="text" placeholder="Add a comment... (also fake)" />
+        <button class="post-btn">Post</button>
+      </div>
+    </div>
+
+    <!-- ===================== POST 2 ===================== -->
+    <div class="post">
+      <div class="post-header">
+        <div class="avatar-ring">
+          <div class="avatar-inner">🍜</div>
+        </div>
+        <div class="post-meta">
+          <div class="post-username">kangbakso_official</div>
+          <div class="post-location">📍 Warung Pinggir Jalan, Indonesia</div>
+        </div>
+        <div class="post-more">···</div>
+      </div>
+
+      <!-- Image: Permanently broken image -->
+      <div class="post-image" style="background: #f9f9f9;">
+        <div class="img-error">
+          <div class="error-icon">🖼️💔</div>
+          <div class="error-text">
+            Image loading failed permanently.<br/>
+            Our servers gave up.<br/>
+            We also gave up.<br/>
+            <span style="font-size:1.5rem;">🙂</span>
+          </div>
+          <div class="error-code">
+            ERR_IMAGE_TOO_DELICIOUS_TO_LOAD<br/>
+            HTTP 418 · I'm a Teapot
+          </div>
+        </div>
+      </div>
+
+      <div class="post-actions">
+        <button class="action-btn" onclick="this.textContent='❤️'; this.classList.add('liked')">🤍</button>
+        <button class="action-btn">💬</button>
+        <button class="action-btn">📤</button>
+        <div class="spacer"></div>
+        <button class="action-btn">🔖</button>
+      </div>
+
+      <div class="post-likes">69,420 likes</div>
+      <div class="post-caption">
+        <span class="uname">kangbakso_official</span>
+        bakso spesial hari ini. foto ga bisa diupload karena terlalu enak. maaf ya. besok juga sama.
+      </div>
+      <div class="post-tags">#bakso #foodporn #foodpornFailed #sorryNotSorry #warungBuSiti</div>
+      <div class="post-comments-link">View all 4,201 comments</div>
+      <div class="post-time">2 hours ago · or maybe yesterday</div>
+      <div class="comment-box">
+        <div class="comment-avatar">👤</div>
+        <input class="comment-input" type="text" placeholder="Add a comment..." />
+        <button class="post-btn">Post</button>
+      </div>
+    </div>
+
+    <!-- ===================== POST 3 ===================== -->
+    <div class="post">
+      <div class="post-header">
+        <div class="avatar-ring">
+          <div class="avatar-inner">🐱</div>
+        </div>
+        <div class="post-meta">
+          <div class="post-username">catlover404 <span class="verified">✦ verified?</span></div>
+          <div class="post-location">📍 Somewhere on the Couch</div>
+        </div>
+        <div class="post-more">···</div>
+      </div>
+
+      <!-- Image: A CSS "beautiful landscape" -->
+      <div class="post-image">
+        <div class="css-photo" style="background: linear-gradient(180deg, #87ceeb 0%, #87ceeb 55%, #90ee90 55%, #7cba5f 100%); width:100%; height:100%;">
+          <div style="position:relative; width:100%; height:100%; display:flex; align-items:center; justify-content:center; flex-direction:column;">
+            <!-- Sun -->
+            <div class="sun" style="position:absolute; top:14%; left:20%;"></div>
+            <!-- Cloud 1 -->
+            <div style="position:absolute; top:18%; left:40%; display:flex;">
+              <div style="width:30px;height:20px; background:white; border-radius:50% 50% 0 50%; opacity:0.9;"></div>
+              <div style="width:40px;height:25px; background:white; border-radius:50%; margin-left:-10px; opacity:0.9;"></div>
+              <div style="width:25px;height:18px; background:white; border-radius:50% 50% 50% 0; margin-left:-8px; opacity:0.9;"></div>
+            </div>
+            <!-- Mountains -->
+            <div style="position:absolute; bottom:30%; left:0; right:0; display:flex; align-items:flex-end; justify-content:center; gap:-10px;">
+              <div style="width:0;height:0;border-left:60px solid transparent;border-right:60px solid transparent;border-bottom:90px solid #6b8e6b;"></div>
+              <div style="width:0;height:0;border-left:80px solid transparent;border-right:80px solid transparent;border-bottom:120px solid #5a7a5a; margin-left:-20px;"></div>
+              <div style="width:0;height:0;border-left:50px solid transparent;border-right:50px solid transparent;border-bottom:75px solid #6b8e6b; margin-left:-15px;"></div>
+            </div>
+            <!-- Cat sitting on hill -->
+            <div style="position:absolute; bottom:28%; left:50%; transform:translateX(-50%); font-size:2.5rem; filter:drop-shadow(0 2px 3px rgba(0,0,0,0.2));">🐈</div>
+            <!-- "Painted by artist" label -->
+            <div style="position:absolute; bottom:8px; right:10px; font-size:0.6rem; color:rgba(0,0,0,0.4); font-style:italic;">
+              CSS Art™ by catlover404 (no refunds)
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="post-actions">
+        <button class="action-btn" onclick="this.textContent='❤️'; this.classList.add('liked')">🤍</button>
+        <button class="action-btn">💬</button>
+        <button class="action-btn">📤</button>
+        <div class="spacer"></div>
+        <button class="action-btn">🔖</button>
+      </div>
+
+      <div class="post-likes">7 likes</div>
+      <div class="post-caption">
+        <span class="uname">catlover404</span>
+        my cat's landscape painting. she knocked my laptop off the table while i was coding this and accidentally made art. i kept it. she gets 90% of the likes.
+        <span style="font-size:0.85rem;">🐾🎨</span>
+      </div>
+      <div class="post-tags">#CatArt #NotMySkill #CSS #TheresABugInTheMountains</div>
+      <div class="post-comments-link">View all 2 comments</div>
+      <div class="post-time">Just now (posted 7 times because of lag)</div>
+      <div class="comment-box">
+        <div class="comment-avatar">👤</div>
+        <input class="comment-input" type="text" placeholder="Add a comment..." />
+        <button class="post-btn">Post</button>
+      </div>
+    </div>
+
+  </div><!-- /feed -->
+
+  <!-- ========= SIDEBAR ========= -->
+  <div class="sidebar">
+
+    <!-- You -->
+    <div class="sidebar-user">
+      <div class="sidebar-avatar">
+        <div class="sidebar-avatar-inner">😶</div>
+      </div>
+      <div>
+        <div class="sidebar-uname">you_hopefully</div>
+        <div class="sidebar-name">Your Name Here (probably)</div>
+      </div>
+      <button class="sidebar-switch">Switch</button>
+    </div>
+
+    <!-- Suggestions -->
+    <div class="sidebar-section-title">Suggestions For You</div>
+
+    <div class="suggestion">
+      <div class="sug-avatar">🤠</div>
+      <div class="sug-info">
+        <div class="sug-uname">cowboy_developer</div>
+        <div class="sug-sub">Followed by no one you know</div>
+      </div>
+      <button class="sug-follow" onclick="this.textContent='Following ✓'; this.style.color='gray'">Follow</button>
+    </div>
+
+    <div class="suggestion">
+      <div class="sug-avatar">🍌</div>
+      <div class="sug-info">
+        <div class="sug-uname">bananaking2000</div>
+        <div class="sug-sub">New to Nge-Gram • suspicious</div>
+      </div>
+      <button class="sug-follow" onclick="this.textContent='Following ✓'; this.style.color='gray'">Follow</button>
+    </div>
+
+    <div class="suggestion">
+      <div class="sug-avatar">🤖</div>
+      <div class="sug-info">
+        <div class="sug-uname">totallyhuman_real</div>
+        <div class="sug-sub">Followed by 0 humans</div>
+      </div>
+      <button class="sug-follow" onclick="this.textContent='Following ✓'; this.style.color='gray'">Follow</button>
+    </div>
+
+    <div class="suggestion">
+      <div class="sug-avatar">👁️</div>
+      <div class="sug-info">
+        <div class="sug-uname">definitely_not_nsa</div>
+        <div class="sug-sub">Followed by everyone, somehow</div>
+      </div>
+      <button class="sug-follow" onclick="this.textContent='Following ✓'; this.style.color='gray'">Follow</button>
+    </div>
+
+    <!-- Footer -->
+    <div class="sidebar-footer">
+      <a href="#">About</a> · <a href="#">Help</a> · <a href="#">Press</a> · <a href="#">API</a> · 
+      <a href="#">Jobs (lol)</a> · <a href="#">Privacy (what's that)</a> · <a href="#">Terms</a><br/>
+      <br/>
+      © 2025 Nge-Gram Inc.<br/>
+      Not affiliated with Instagram, Meta, or human decency.<br/>
+      <span style="color:#ff2d78; font-weight:700;">⚠️ PARODY — FOR EDUCATIONAL USE ONLY ⚠️</span>
+    </div>
+
+  </div><!-- /sidebar -->
+
+</div><!-- /page-wrap -->
+
+</body>
+</html>
